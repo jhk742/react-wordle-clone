@@ -44,6 +44,10 @@
     border-radius: 3px;
     border: 2px solid #CCCCCC;
     background: #000;
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 1.5rem;
 }
 
 .keys--container {
