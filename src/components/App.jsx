@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Key from './Key'
 import keyboard from '../helpers/keys'
 
+const answer = "RIGHT"
 
 export default function App() {
 
@@ -9,13 +10,23 @@ export default function App() {
   const [keysArray, setKeysArray] = useState(keyboard)
   const [gridIndex, setGridIndex] = useState(0) //0~29
   const [gridRowIndex, setGridRowIndex] = useState(0) //0~5
+  const [gridRow, setGridRow] = useState({start: 0, finish: 4})
   const [tooShort, setTooShort] = useState(false)
   const [continueToNextRow, setContinueToNextRow] = useState(true)
 
+  const compareAnswer = () => {
+    for (let i = gridRow.start; i <= gridRow.finish; i++) {
+      if (grid[i] === answer[i - gridRow.start]) console.log("NICE")
+      else console.log("BOO")
+    }
+    console.log()
+    setGridRow(prev => ({start: prev.finish + 1, finish: prev.finish + 5}))
+  }
+
   const handleInput = (event) => {
+    console.log(gridRow)
     let pressedKey = event.type === "keydown" ? event.key.toUpperCase() : event.target.dataset.value.toUpperCase()
     pressedKey = (pressedKey === "BACKSPACE" || pressedKey === "DELETE") ? "DELETE" : pressedKey
-    console.log(pressedKey)
     if (!keysArray.flat().includes(pressedKey)) return
       
     //if a row is filled, the user won't be able to move onto the next row until they hit enter
@@ -29,6 +40,7 @@ export default function App() {
       setGridRowIndex(0)
       setContinueToNextRow(true)
       setTooShort(false)
+      compareAnswer()
     }
 
     //the row is not yet filled but the user presses ENTER => no input
