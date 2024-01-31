@@ -11,6 +11,7 @@
     align-items: center;
     background-color: #000;
     height: 100vh;
+    position: relative;
 }
 
 .navbar {
@@ -86,4 +87,18 @@
 .keyItem--ENTER, .keyItem--DELETE {
     color: #fff;
     width: 130px;
+}
+
+.toggleShortMessage {
+    background: #fff;
+    width: 40vw;
+    height: 10vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 2rem;
+    position: absolute;
+    top: 30%;
 }

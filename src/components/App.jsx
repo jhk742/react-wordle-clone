@@ -31,7 +31,7 @@ export default function App() {
       setTooShort(false)
     }
 
-    // the row is not yet filled but the user presses ENTER
+    //the row is not yet filled but the user presses ENTER => no input
     if (pressedKey === "ENTER" && gridIndex % 5 !== 0) {
       setTooShort(true)
       return
@@ -53,10 +53,16 @@ export default function App() {
 
   useEffect(() => {
     window.addEventListener("keydown", handleInput)
+    const timeoutId = setTimeout(() => {
+      setTooShort(false)
+    }, 1500);
+
     return () => {
-      window.removeEventListener('keydown', handleInput);
+      window.removeEventListener('keydown', handleInput)
+      clearTimeout(timeoutId); // Clear the timeout on component unmount or re-render
+
     };
-  }, [gridRowIndex])
+  }, [gridRowIndex, tooShort])
 
   const tiles = grid.map((tile, index) => {
     return (
@@ -71,7 +77,7 @@ export default function App() {
       <div className="navbar">Wordle Clone</div>
       <div className="grid--container">{tiles}</div>
       <Key keysArray={keysArray} handleInput={handleInput}/>
-      {tooShort && <div>TOO SHORT</div>}
+      {tooShort && <div className="toggleShortMessage">Too short</div>}
     </div>
   )
 }
