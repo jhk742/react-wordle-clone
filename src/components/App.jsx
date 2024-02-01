@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Key from './Key'
 import Tiles from './Tiles'
 import keyboard from '../helpers/keys'
+import keyboardHighlights from '../helpers/keysHighlight'
 
 const answer = "RIGHT"
 //https://wordlegame.org/
@@ -16,24 +17,31 @@ export default function App() {
   const [tooShort, setTooShort] = useState(false)
   const [continueToNextRow, setContinueToNextRow] = useState(true)
   const [animateTile, setAnimateTile] = useState(null)
-  // const [colorTile, setColorTile] = useState({highlight: false, color: "none", gridIndex})
-const [colorTile, setColorTile] = useState([])
+  const [colorTile, setColorTile] = useState([])
+  const [colorKey, setColorKey] = useState(keyboardHighlights)
 
   const compareAnswer = () => {
     for (let i = gridRow.start; i <= gridRow.finish; i++) {
       if (grid[i] === answer[i - gridRow.start]) {
         //highlight tile green
-        // setColorTile({highlight: true, color: "green", gridIndex: i})
         setColorTile(prev => [...prev, {highlight: true, color: "green", gridIndex: i}])
-        console.log(i, "YESG")
+        setColorKey(prev => {
+          return ({...prev, [grid[i]]: {highlight: true, color: "green"}})
+        })
+        console.log(i, "YESG", "VALUE: " + grid[i])
       } else if (grid[i] !== answer[i - gridRow.start] && answer.includes(grid[i])) {
         //highlight tile yellow
-        // setColorTile({highlight: true, color: "yellow", gridIndex: i})
         setColorTile(prev => [...prev, {highlight: true, color: "yellow", gridIndex: i}])
-        console.log(i, "YESY")
+        setColorKey(prev => {
+          return ({...prev, [grid[i]]: {highlight: true, color: "yellow"}})
+        })
+        console.log(i, "YESY", "VALUE: " + grid[i])
       } else {
         setColorTile(prev => [...prev, {highlight: true, color: "gray", gridIndex: i}])
-        console.log(i, "NO")
+        setColorKey(prev => {
+          return ({...prev, [grid[i]]: {highlight: true, color: "gray"}})
+        })
+        console.log(i, "NO", "VALUE: " + grid[i])
       }
     }
     console.log()
@@ -100,10 +108,6 @@ const [colorTile, setColorTile] = useState([])
   }
 
   useEffect(() => {
-    console.log(colorTile);
-  }, [colorTile]);
-
-  useEffect(() => {
     window.addEventListener("keydown", handleInput)
     const timeoutId = setTimeout(() => {
       setTooShort(false)
@@ -125,9 +129,8 @@ const [colorTile, setColorTile] = useState([])
   return (
     <div className="App">
       <div className="navbar">Wordle Clone</div>
-      {/* <div className="grid--container">{tiles}</div> */}
-      <Tiles grid={grid} animateTile={animateTile} colorTile={colorTile}/>
-      <Key keysArray={keysArray} handleInput={handleInput}/>
+      <Tiles grid={grid} colorTile={colorTile} animateTile={animateTile} />
+      <Key keysArray={keysArray} colorKey={colorKey} handleInput={handleInput}/>
       {tooShort && <div className="toggleShortMessage">Too short</div>}
     </div>
   )
