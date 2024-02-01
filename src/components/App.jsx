@@ -33,6 +33,7 @@ export default function App() {
     setUserAnswer("")
     setAnswer(wordBank[Math.floor(Math.random() * wordBank.length)])
     setGameState({play: true, status: "none"})
+    setColorKey(keyboardHighlights)
     pressedKeyRef.current = null
   }
 
