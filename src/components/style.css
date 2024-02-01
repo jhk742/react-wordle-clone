@@ -1,3 +1,9 @@
+:root {
+    --color--green: #79b851;
+    --color--yellow: #f3c237;
+    --color--gray: #a4aec4;
+}
+
 * {
     padding: 0;
     margin: 0;
@@ -108,4 +114,19 @@
     font-size: 2rem;
     position: absolute;
     top: 30%;
+}
+
+.highlight--green {
+    background: var(--color--green);
+    border: var(--color--green);
+}
+
+.highlight--yellow {
+    background: var(--color--yellow);
+    border: var(--color--yellow);
+}
+
+.highlight--gray {
+    background: var(--color--gray);
+    border: var(--color--gray);
 }

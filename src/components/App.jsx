@@ -16,13 +16,25 @@ export default function App() {
   const [tooShort, setTooShort] = useState(false)
   const [continueToNextRow, setContinueToNextRow] = useState(true)
   const [animateTile, setAnimateTile] = useState(null)
-  const [colorTile, setColorTile] = useState(null)
-
+  // const [colorTile, setColorTile] = useState({highlight: false, color: "none", gridIndex})
+const [colorTile, setColorTile] = useState([])
 
   const compareAnswer = () => {
     for (let i = gridRow.start; i <= gridRow.finish; i++) {
-      if (grid[i] === answer[i - gridRow.start]) console.log("NICE")
-      else console.log("BOO")
+      if (grid[i] === answer[i - gridRow.start]) {
+        //highlight tile green
+        // setColorTile({highlight: true, color: "green", gridIndex: i})
+        setColorTile(prev => [...prev, {highlight: true, color: "green", gridIndex: i}])
+        console.log(i, "YESG")
+      } else if (grid[i] !== answer[i - gridRow.start] && answer.includes(grid[i])) {
+        //highlight tile yellow
+        // setColorTile({highlight: true, color: "yellow", gridIndex: i})
+        setColorTile(prev => [...prev, {highlight: true, color: "yellow", gridIndex: i}])
+        console.log(i, "YESY")
+      } else {
+        setColorTile(prev => [...prev, {highlight: true, color: "gray", gridIndex: i}])
+        console.log(i, "NO")
+      }
     }
     console.log()
     setGridRow(prev => ({start: prev.finish + 1, finish: prev.finish + 5}))
@@ -55,6 +67,7 @@ export default function App() {
     pressedKey = (pressedKey === "BACKSPACE" || pressedKey === "DELETE") ? "DELETE" : pressedKey
     if (!keysArray.flat().includes(pressedKey)) return
       
+    //to delete
     if (gridIndex !== 0 && pressedKey === "DELETE") removeCharacter()
 
     //if a row is filled, the user won't be able to move onto the next row until they hit enter
@@ -87,6 +100,10 @@ export default function App() {
   }
 
   useEffect(() => {
+    console.log(colorTile);
+  }, [colorTile]);
+
+  useEffect(() => {
     window.addEventListener("keydown", handleInput)
     const timeoutId = setTimeout(() => {
       setTooShort(false)
@@ -109,7 +126,7 @@ export default function App() {
     <div className="App">
       <div className="navbar">Wordle Clone</div>
       {/* <div className="grid--container">{tiles}</div> */}
-      <Tiles grid={grid} animateTile={animateTile} />
+      <Tiles grid={grid} animateTile={animateTile} colorTile={colorTile}/>
       <Key keysArray={keysArray} handleInput={handleInput}/>
       {tooShort && <div className="toggleShortMessage">Too short</div>}
     </div>
