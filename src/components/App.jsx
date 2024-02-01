@@ -15,7 +15,6 @@ export default function App() {
   const [gridIndex, setGridIndex] = useState(0) //0~29
   const [rowIndex, setRowIndex] = useState(0) //0~5
   const [tooShort, setTooShort] = useState(false)
-  const [continueToNextRow, setContinueToNextRow] = useState(true)
   const [animateTile, setAnimateTile] = useState(null)
   const [colorTile, setColorTile] = useState([])
   const [colorKey, setColorKey] = useState(keyboardHighlights)
@@ -79,7 +78,6 @@ export default function App() {
     })
     setGridIndex(prev => prev - 1)
     setRowIndex(prev => prev - 1)
-    setContinueToNextRow(true)
   }
 
   const handleInput = (event) => {
@@ -89,35 +87,24 @@ export default function App() {
 
     //to delete
     if (gridIndex !== 0 && pressedKey === "DELETE") removeCharacter()
-
-    //NEED TO FIX THIS PART: CREATE A NEW METHOD TO DEAL WITH THIS OR SOMETHING
-    //RIGHT NOW, IT ONLY CHECKS IF ENTER IS PRESSED TO MOVE ON FOR THE FIRST ROW
-    //ONCE THAT IS THE CASE, 
-    if (gridIndex !== gridRow.start && gridIndex > gridRow.finish) {
-      if (pressedKey === "ENTER") {
-        setContinueToNextRow(true)
-      } else {
-        return
-      }
-    }
+    if (gridIndex !== gridRow.start && gridIndex > gridRow.finish && pressedKey !== "ENTER") return
 
     //only when they hit "ENTER" when at the end of the row can they move forward
     if (gridIndex !== gridRow.start && gridIndex % 5 === 0 && pressedKey === "ENTER") {
       setRowIndex(0)
-      setContinueToNextRow(true)
       setTooShort(false)
       setUserAnswer("")
       compareAnswer()
     }
 
     //the row is not yet filled but the user presses ENTER => no input
-    if (pressedKey === "ENTER" && gridIndex % 5 !== 0) {
+    if (pressedKey === "ENTER" && gridIndex !== gridRow.finish + 1) {
       setTooShort(true)
       return
     }
 
     //if input passess all conditions, have the character appear in the corresponding tile
-    if (continueToNextRow &&
+    if (
         pressedKey !== "ENTER" &&
         pressedKey !== "DELETE"
       ) {
