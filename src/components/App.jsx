@@ -3,22 +3,30 @@ import Key from './Key'
 import Tiles from './Tiles'
 import keyboard from '../helpers/keys'
 import keyboardHighlights from '../helpers/keysHighlight'
+import fiveLetterWords from '../helpers/wordBank'
 
-const answer = "RIGHT"
-//https://wordlegame.org/
+// const answer = "RIGHT"
 
 export default function App() {
 
   const [grid, setGrid] = useState(Array(30).fill(""))
   const [keysArray, setKeysArray] = useState(keyboard)
-  const [gridIndex, setGridIndex] = useState(0) //0~29
-  const [gridRowIndex, setGridRowIndex] = useState(0) //0~5 change to rowIndex
   const [gridRow, setGridRow] = useState({start: 0, finish: 4})
+  const [gridIndex, setGridIndex] = useState(0) //0~29
+  const [rowIndex, setRowIndex] = useState(0) //0~5
   const [tooShort, setTooShort] = useState(false)
   const [continueToNextRow, setContinueToNextRow] = useState(true)
   const [animateTile, setAnimateTile] = useState(null)
   const [colorTile, setColorTile] = useState([])
   const [colorKey, setColorKey] = useState(keyboardHighlights)
+
+  const [userAnswer, setUserAnswer] = useState("")
+  const [wordBank, setWordBank] = useState(fiveLetterWords)
+  const [answer, setAnswer] = useState(wordBank[Math.floor(Math.random() * wordBank.length)])
+  // const [gameState, setGameState] = useState(true)
+  const [gameState, setGameState] = useState({play: true, status: "none"})
+
+  console.log(answer)
 
   const compareAnswer = () => {
     for (let i = gridRow.start; i <= gridRow.finish; i++) {
@@ -43,6 +51,7 @@ export default function App() {
           return ({...prev, [grid[i]]: {highlight: true, color: "gray"}})
         })
       }
+      setUserAnswer(prev => prev + grid[i])
     }
     console.log()
     setGridRow(prev => ({start: prev.finish + 1, finish: prev.finish + 5}))
@@ -56,7 +65,7 @@ export default function App() {
     })
     setAnimateTile(gridIndex)
     setGridIndex(prev => prev + 1)
-    setGridRowIndex(prev => prev + 1)
+    setRowIndex(prev => prev + 1)
   }
 
   const removeCharacter = () => {
@@ -71,7 +80,7 @@ export default function App() {
       })
     })
     setGridIndex(prev => prev - 1)
-    setGridRowIndex(prev => prev - 1)
+    setRowIndex(prev => prev - 1)
     setContinueToNextRow(true)
   }
 
@@ -86,16 +95,17 @@ export default function App() {
       removeCharacter()}
 
     //if a row is filled, the user won't be able to move onto the next row until they hit enter
-    if (gridIndex !== 0 && gridRowIndex > 4 && pressedKey !== "ENTER") {
+    if (gridIndex !== 0 && rowIndex > 4 && pressedKey !== "ENTER") {
       setContinueToNextRow(false)
       return
     }
 
     //only when they hit "ENTER" when at the end of the row can they move forward
     if (gridIndex !== gridRow.start && gridIndex % 5 === 0 && pressedKey === "ENTER") {
-      setGridRowIndex(0)
+      setRowIndex(0)
       setContinueToNextRow(true)
       setTooShort(false)
+      setUserAnswer("")
       compareAnswer()
     }
 
@@ -111,11 +121,15 @@ export default function App() {
         pressedKey !== "DELETE"
       ) {
       addCharacter(pressedKey)
-
     } 
   }
 
   useEffect(() => {
+    if (userAnswer === answer) {
+      setGameState({play: false, status: "win"});
+      console.log(gameState)
+    }
+
     window.addEventListener("keydown", handleInput)
     const timeoutId = setTimeout(() => {
       setTooShort(false)
@@ -132,7 +146,11 @@ export default function App() {
       clearTimeout(animationTimeoutId) // Clear the animation timeout on component unmount or re-render
     }
 
-  }, [gridRowIndex, tooShort, gridRow])
+  }, [rowIndex, tooShort, gridRow, userAnswer, answer])
+
+  useEffect(() => {
+    
+  }, [userAnswer, answer]);
 
   return (
     <div className="App">
@@ -140,6 +158,11 @@ export default function App() {
       <Tiles grid={grid} colorTile={colorTile} animateTile={animateTile} />
       <Key keysArray={keysArray} colorKey={colorKey} handleInput={handleInput}/>
       {tooShort && <div className="toggleShortMessage">Too short</div>}
+      {!gameState.play && 
+      <div className="toggleShortMessage">
+        {`You ${gameState.status}`}
+        <button>Play Again?</button>
+      </div>}
     </div>
   )
 }
