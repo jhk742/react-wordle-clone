@@ -107,13 +107,30 @@
     width: 40vw;
     height: 10vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: space-around;
     align-items: center;
     border-radius: 5px;
     font-weight: bold;
     font-size: 2rem;
     position: absolute;
     top: 30%;
+}
+
+.toggleShortMessage button {
+    background: #000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fff;
+    width: 50%;
+    height: 30%;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.toggleShortMessage button:hover {
+    background: #555555;
 }
 
 .highlight--green {

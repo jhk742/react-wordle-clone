@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Key from './Key'
 import Tiles from './Tiles'
 import keyboard from '../helpers/keys'
 import keyboardHighlights from '../helpers/keysHighlight'
 import fiveLetterWords from '../helpers/wordBank'
-
-// const answer = "RIGHT"
 
 export default function App() {
 
@@ -18,14 +16,25 @@ export default function App() {
   const [animateTile, setAnimateTile] = useState(null)
   const [colorTile, setColorTile] = useState([])
   const [colorKey, setColorKey] = useState(keyboardHighlights)
-
   const [userAnswer, setUserAnswer] = useState("")
   const [wordBank, setWordBank] = useState(fiveLetterWords)
   const [answer, setAnswer] = useState(wordBank[Math.floor(Math.random() * wordBank.length)])
-  // const [gameState, setGameState] = useState(true)
   const [gameState, setGameState] = useState({play: true, status: "none"})
+  const pressedKeyRef = useRef(null)
 
-  console.log(answer)
+  const resetGame = () => {
+    setGrid(Array(30).fill(""))
+    setGridRow({start: 0, finish: 4})
+    setGridIndex(0)
+    setRowIndex(0)
+    setTooShort(false)
+    setAnimateTile(null)
+    setColorTile([])
+    setUserAnswer("")
+    setAnswer(wordBank[Math.floor(Math.random() * wordBank.length)])
+    setGameState({play: true, status: "none"})
+    pressedKeyRef.current = null
+  }
 
   const compareAnswer = () => {
     for (let i = gridRow.start; i <= gridRow.finish; i++) {
@@ -66,7 +75,6 @@ export default function App() {
   }
 
   const removeCharacter = () => {
-
     // this means the row above has been submitted and locked to prevent deletion
     if (gridIndex <= gridRow.start) return
 
@@ -83,10 +91,14 @@ export default function App() {
   const handleInput = (event) => {
     let pressedKey = event.type === "keydown" ? event.key.toUpperCase() : event.target.dataset.value.toUpperCase()
     pressedKey = (pressedKey === "BACKSPACE" || pressedKey === "DELETE") ? "DELETE" : pressedKey
+    pressedKeyRef.current = pressedKey
+    
     if (!keysArray.flat().includes(pressedKey)) return
 
     //to delete
     if (gridIndex !== 0 && pressedKey === "DELETE") removeCharacter()
+
+    //blocks users from moving onto next row without typing "Enter" (if on fifth tile)
     if (gridIndex !== gridRow.start && gridIndex > gridRow.finish && pressedKey !== "ENTER") return
 
     //only when they hit "ENTER" when at the end of the row can they move forward
@@ -113,11 +125,9 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (userAnswer === answer) {
+    if (gridIndex < 30 && userAnswer === answer && pressedKeyRef.current === "ENTER") {
       setGameState({play: false, status: "Win"})
-    }
-
-    if (gridIndex === 30 && userAnswer !== answer) {
+    } else if (gridIndex === 30 && userAnswer !== answer && pressedKeyRef.current === "ENTER") {
       setGameState({play: false, status: "Lose"})
     }
 
@@ -137,11 +147,7 @@ export default function App() {
       clearTimeout(animationTimeoutId) // Clear the animation timeout on component unmount or re-render
     }
 
-  }, [rowIndex, tooShort, gridRow, userAnswer, answer])
-
-  useEffect(() => {
-    
-  }, [userAnswer, answer]);
+  }, [rowIndex, tooShort, gridRow, userAnswer])
 
   return (
     <div className="App">
@@ -151,8 +157,8 @@ export default function App() {
       {tooShort && <div className="toggleShortMessage">Too short</div>}
       {!gameState.play && 
       <div className="toggleShortMessage">
-        {`You ${gameState.status}!`}
-        <button>Play Again?</button>
+        <p>{`You ${gameState.status}!`}</p>
+        <button onClick={resetGame}>Play Again</button>
       </div>}
     </div>
   )
