@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import Key from './Key'
+import Tiles from './Tiles'
 import keyboard from '../helpers/keys'
 
 const answer = "RIGHT"
+//https://wordlegame.org/
 
 export default function App() {
 
@@ -13,6 +15,9 @@ export default function App() {
   const [gridRow, setGridRow] = useState({start: 0, finish: 4})
   const [tooShort, setTooShort] = useState(false)
   const [continueToNextRow, setContinueToNextRow] = useState(true)
+  const [animateTile, setAnimateTile] = useState(null)
+  const [colorTile, setColorTile] = useState(null)
+
 
   const compareAnswer = () => {
     for (let i = gridRow.start; i <= gridRow.finish; i++) {
@@ -23,12 +28,35 @@ export default function App() {
     setGridRow(prev => ({start: prev.finish + 1, finish: prev.finish + 5}))
   }
 
+  const addCharacter = (pressedKey) => {
+    setGrid(prev => {
+      return prev.map((key, index) => {
+        return index === gridIndex ? pressedKey : key
+      })
+    })
+    setAnimateTile(gridIndex)
+    setGridIndex(prev => prev + 1)
+    setGridRowIndex(prev => prev + 1)
+  }
+
+  const removeCharacter = () => {
+    setGrid(prev => {
+      let lastNonEmptyIndex = grid.findIndex(char => char === "") - 1
+      return prev.map((prevCharacter, index) => {
+        return index === lastNonEmptyIndex ? "" : prevCharacter
+      })
+    })
+    setGridIndex(prev => prev - 1)
+    setGridRowIndex(prev => prev - 1)
+  }
+
   const handleInput = (event) => {
-    console.log(gridRow)
     let pressedKey = event.type === "keydown" ? event.key.toUpperCase() : event.target.dataset.value.toUpperCase()
     pressedKey = (pressedKey === "BACKSPACE" || pressedKey === "DELETE") ? "DELETE" : pressedKey
     if (!keysArray.flat().includes(pressedKey)) return
       
+    if (gridIndex !== 0 && pressedKey === "DELETE") removeCharacter()
+
     //if a row is filled, the user won't be able to move onto the next row until they hit enter
     if (gridIndex !== 0 && gridRowIndex > 4 && pressedKey !== "ENTER") {
       setContinueToNextRow(false)
@@ -48,46 +76,40 @@ export default function App() {
       setTooShort(true)
       return
     }
-    
+
+    //if input passess all conditions, have the character appear in the corresponding tile
     if (continueToNextRow &&
         pressedKey !== "ENTER" &&
         pressedKey !== "DELETE"
       ) {
-      setGrid(prev => {
-        return prev.map((key, index) => {
-          return index === gridIndex ? pressedKey : key
-        })
-      })
-      setGridIndex(prev => prev + 1)
-      setGridRowIndex(prev => prev + 1)
-    }
+      addCharacter(pressedKey)
+    } 
   }
 
   useEffect(() => {
     window.addEventListener("keydown", handleInput)
     const timeoutId = setTimeout(() => {
       setTooShort(false)
-    }, 1500);
+    }, 1500)
+
+    // Clear the animation state after a delay
+    const animationTimeoutId = setTimeout(() => {
+      setAnimateTile(false)
+    }, 150);
 
     return () => {
       window.removeEventListener('keydown', handleInput)
-      clearTimeout(timeoutId); // Clear the timeout on component unmount or re-render
+      clearTimeout(timeoutId) // Clear the timeout on component unmount or re-render
+      clearTimeout(animationTimeoutId) // Clear the animation timeout on component unmount or re-render
+    }
 
-    };
   }, [gridRowIndex, tooShort])
-
-  const tiles = grid.map((tile, index) => {
-    return (
-      <div key={index} className="grid--item">
-        {tile}
-      </div>
-    )
-  })
 
   return (
     <div className="App">
       <div className="navbar">Wordle Clone</div>
-      <div className="grid--container">{tiles}</div>
+      {/* <div className="grid--container">{tiles}</div> */}
+      <Tiles grid={grid} animateTile={animateTile} />
       <Key keysArray={keysArray} handleInput={handleInput}/>
       {tooShort && <div className="toggleShortMessage">Too short</div>}
     </div>
