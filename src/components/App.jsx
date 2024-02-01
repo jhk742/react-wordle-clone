@@ -36,14 +36,12 @@ export default function App() {
         setColorKey(prev => {
           return ({...prev, [grid[i]]: {highlight: true, color: "green"}})
         })
-        console.log(i, "YESG", "VALUE: " + grid[i])
       } else if (grid[i] !== answer[i - gridRow.start] && answer.includes(grid[i])) {
         //highlight tile yellow
         setColorTile(prev => [...prev, {highlight: true, color: "yellow", gridIndex: i}])
         setColorKey(prev => {
           return ({...prev, [grid[i]]: {highlight: true, color: "yellow"}})
         })
-        console.log(i, "YESY", "VALUE: " + grid[i])
       } else {
         //highlight tile gray
         setColorTile(prev => [...prev, {highlight: true, color: "gray", gridIndex: i}])
@@ -87,17 +85,20 @@ export default function App() {
   const handleInput = (event) => {
     let pressedKey = event.type === "keydown" ? event.key.toUpperCase() : event.target.dataset.value.toUpperCase()
     pressedKey = (pressedKey === "BACKSPACE" || pressedKey === "DELETE") ? "DELETE" : pressedKey
-    if (!keysArray.flat().includes(pressedKey)) {
-      return}
+    if (!keysArray.flat().includes(pressedKey)) return
 
     //to delete
-    if (gridIndex !== 0 && pressedKey === "DELETE") {
-      removeCharacter()}
+    if (gridIndex !== 0 && pressedKey === "DELETE") removeCharacter()
 
-    //if a row is filled, the user won't be able to move onto the next row until they hit enter
-    if (gridIndex !== 0 && rowIndex > 4 && pressedKey !== "ENTER") {
-      setContinueToNextRow(false)
-      return
+    //NEED TO FIX THIS PART: CREATE A NEW METHOD TO DEAL WITH THIS OR SOMETHING
+    //RIGHT NOW, IT ONLY CHECKS IF ENTER IS PRESSED TO MOVE ON FOR THE FIRST ROW
+    //ONCE THAT IS THE CASE, 
+    if (gridIndex !== gridRow.start && gridIndex > gridRow.finish) {
+      if (pressedKey === "ENTER") {
+        setContinueToNextRow(true)
+      } else {
+        return
+      }
     }
 
     //only when they hit "ENTER" when at the end of the row can they move forward
@@ -126,8 +127,11 @@ export default function App() {
 
   useEffect(() => {
     if (userAnswer === answer) {
-      setGameState({play: false, status: "win"});
-      console.log(gameState)
+      setGameState({play: false, status: "Win"})
+    }
+
+    if (gridIndex === 30 && userAnswer !== answer) {
+      setGameState({play: false, status: "Lose"})
     }
 
     window.addEventListener("keydown", handleInput)
@@ -160,7 +164,7 @@ export default function App() {
       {tooShort && <div className="toggleShortMessage">Too short</div>}
       {!gameState.play && 
       <div className="toggleShortMessage">
-        {`You ${gameState.status}`}
+        {`You ${gameState.status}!`}
         <button>Play Again?</button>
       </div>}
     </div>
