@@ -23,8 +23,6 @@ export default function App() {
   const [giveUp, setGiveUp] = useState(false)
   const pressedKeyRef = useRef(null)
 
-  console.log(answer)
-
   const resetGame = () => {
     setGrid(Array(30).fill(""))
     setGridRow({start: 0, finish: 4})
@@ -39,10 +37,6 @@ export default function App() {
     setColorKey(keyboardHighlights)
     setGiveUp(false)
     pressedKeyRef.current = null
-  }
-
-  const forfeit = () => {
-    setGiveUp(true)
   }
 
   const compareAnswer = () => {
@@ -160,7 +154,7 @@ export default function App() {
 
   return (
     <div className="App">
-      <button className="btn--giveup" onClick={forfeit}>Give Up</button>
+      <button className="btn--giveup" onClick={() => {setGiveUp(true)}}>Give Up</button>
       {giveUp && <div className="toggleShortMessage">
         <p>{`The answer was: ${answer}`}</p>
         <button onClick={resetGame}>Play Again</button>
