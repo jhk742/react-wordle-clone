@@ -20,6 +20,7 @@ export default function App() {
   const [wordBank, setWordBank] = useState(fiveLetterWords)
   const [answer, setAnswer] = useState(wordBank[Math.floor(Math.random() * wordBank.length)])
   const [gameState, setGameState] = useState({play: true, status: "none"})
+  const [giveUp, setGiveUp] = useState(false)
   const pressedKeyRef = useRef(null)
 
   const resetGame = () => {
@@ -34,7 +35,13 @@ export default function App() {
     setAnswer(wordBank[Math.floor(Math.random() * wordBank.length)])
     setGameState({play: true, status: "none"})
     setColorKey(keyboardHighlights)
+    setGiveUp(prev => !prev)
     pressedKeyRef.current = null
+  }
+
+  const forfeit = () => {
+    setGameState(prev => !prev)
+    resetGame()
   }
 
   const compareAnswer = () => {
@@ -152,6 +159,11 @@ export default function App() {
 
   return (
     <div className="App">
+      <button className="btn--giveup" onClick={forfeit}>Give Up</button>
+      {giveUp && <div className="toggleShortMessage">
+        <p>{`The answer was: ${answer}`}</p>
+        <button onClick={resetGame}>Play Again</button>
+      </div>}
       <div className="navbar">Wordle Clone</div>
       <Tiles grid={grid} colorTile={colorTile} animateTile={animateTile} />
       <Key keysArray={keysArray} colorKey={colorKey} handleInput={handleInput}/>
