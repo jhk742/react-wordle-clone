@@ -12,7 +12,7 @@ export default function App() {
   const [grid, setGrid] = useState(Array(30).fill(""))
   const [keysArray, setKeysArray] = useState(keyboard)
   const [gridIndex, setGridIndex] = useState(0) //0~29
-  const [gridRowIndex, setGridRowIndex] = useState(0) //0~5
+  const [gridRowIndex, setGridRowIndex] = useState(0) //0~5 change to rowIndex
   const [gridRow, setGridRow] = useState({start: 0, finish: 4})
   const [tooShort, setTooShort] = useState(false)
   const [continueToNextRow, setContinueToNextRow] = useState(true)
@@ -37,11 +37,11 @@ export default function App() {
         })
         console.log(i, "YESY", "VALUE: " + grid[i])
       } else {
+        //highlight tile gray
         setColorTile(prev => [...prev, {highlight: true, color: "gray", gridIndex: i}])
         setColorKey(prev => {
           return ({...prev, [grid[i]]: {highlight: true, color: "gray"}})
         })
-        console.log(i, "NO", "VALUE: " + grid[i])
       }
     }
     console.log()
@@ -60,6 +60,10 @@ export default function App() {
   }
 
   const removeCharacter = () => {
+
+    // this means the row above has been submitted and locked to prevent deletion
+    if (gridIndex <= gridRow.start) return
+
     setGrid(prev => {
       let lastNonEmptyIndex = grid.findIndex(char => char === "") - 1
       return prev.map((prevCharacter, index) => {
@@ -68,15 +72,18 @@ export default function App() {
     })
     setGridIndex(prev => prev - 1)
     setGridRowIndex(prev => prev - 1)
+    setContinueToNextRow(true)
   }
 
   const handleInput = (event) => {
     let pressedKey = event.type === "keydown" ? event.key.toUpperCase() : event.target.dataset.value.toUpperCase()
     pressedKey = (pressedKey === "BACKSPACE" || pressedKey === "DELETE") ? "DELETE" : pressedKey
-    if (!keysArray.flat().includes(pressedKey)) return
-      
+    if (!keysArray.flat().includes(pressedKey)) {
+      return}
+
     //to delete
-    if (gridIndex !== 0 && pressedKey === "DELETE") removeCharacter()
+    if (gridIndex !== 0 && pressedKey === "DELETE") {
+      removeCharacter()}
 
     //if a row is filled, the user won't be able to move onto the next row until they hit enter
     if (gridIndex !== 0 && gridRowIndex > 4 && pressedKey !== "ENTER") {
@@ -85,7 +92,7 @@ export default function App() {
     }
 
     //only when they hit "ENTER" when at the end of the row can they move forward
-    if (gridIndex !== 0 && gridIndex % 5 === 0 && pressedKey === "ENTER") {
+    if (gridIndex !== gridRow.start && gridIndex % 5 === 0 && pressedKey === "ENTER") {
       setGridRowIndex(0)
       setContinueToNextRow(true)
       setTooShort(false)
@@ -104,6 +111,7 @@ export default function App() {
         pressedKey !== "DELETE"
       ) {
       addCharacter(pressedKey)
+
     } 
   }
 
@@ -111,7 +119,7 @@ export default function App() {
     window.addEventListener("keydown", handleInput)
     const timeoutId = setTimeout(() => {
       setTooShort(false)
-    }, 1500)
+    }, 700)
 
     // Clear the animation state after a delay
     const animationTimeoutId = setTimeout(() => {
@@ -124,7 +132,7 @@ export default function App() {
       clearTimeout(animationTimeoutId) // Clear the animation timeout on component unmount or re-render
     }
 
-  }, [gridRowIndex, tooShort])
+  }, [gridRowIndex, tooShort, gridRow])
 
   return (
     <div className="App">
