@@ -23,6 +23,8 @@ export default function App() {
   const [giveUp, setGiveUp] = useState(false)
   const pressedKeyRef = useRef(null)
 
+  console.log(answer)
+
   const resetGame = () => {
     setGrid(Array(30).fill(""))
     setGridRow({start: 0, finish: 4})
@@ -35,13 +37,12 @@ export default function App() {
     setAnswer(wordBank[Math.floor(Math.random() * wordBank.length)])
     setGameState({play: true, status: "none"})
     setColorKey(keyboardHighlights)
-    setGiveUp(prev => !prev)
+    setGiveUp(false)
     pressedKeyRef.current = null
   }
 
   const forfeit = () => {
-    setGameState(prev => !prev)
-    resetGame()
+    setGiveUp(true)
   }
 
   const compareAnswer = () => {
@@ -133,7 +134,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (gridIndex < 30 && userAnswer === answer && pressedKeyRef.current === "ENTER") {
+    if (gridIndex <= 30 && userAnswer === answer && pressedKeyRef.current === "ENTER") {
       setGameState({play: false, status: "Win"})
     } else if (gridIndex === 30 && userAnswer !== answer && pressedKeyRef.current === "ENTER") {
       setGameState({play: false, status: "Lose"})
